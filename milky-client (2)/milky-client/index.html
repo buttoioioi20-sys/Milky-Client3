@@ -1,0 +1,114 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Milky Client</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://mc-heads.net https://cdn.modrinth.com; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
+<style>
+*{box-sizing:border-box}
+body{margin:0;height:100vh;overflow:hidden;color:#fff;font:600 14px ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;background:#000;position:relative}
+body.hub{background:#050506}
+body.sub{background:#0a0b0d}
+#ring{position:absolute;inset:0;display:none;pointer-events:none}body.home #ring{display:none}
+#bg{position:absolute;inset:0;background:url(assets/background.webp) center/cover no-repeat;filter:brightness(.42) contrast(1.05);display:none}
+body.home #bg,body.hub #bg{display:block}
+body.hub #hills{display:none!important}
+#hills{position:absolute;left:0;right:0;bottom:0;height:34%;background:#050506;clip-path:polygon(0 60%,10% 40%,22% 55%,36% 30%,50% 50%,64% 28%,78% 52%,90% 38%,100% 55%,100% 100%,0 100%);display:none}
+body.hub #hills{display:block}
+#m{position:relative;height:100%}
+.btn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);padding:10px 16px;border-radius:12px;font:inherit;cursor:pointer}
+.btn:hover{background:rgba(255,255,255,.22)}.btn.p{background:#fff;color:#000}.btn:disabled{opacity:.4;cursor:default}
+select,input{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.25);padding:9px 12px;border-radius:10px;font:inherit}
+option{color:#000}
+/* home */
+.home-g{position:absolute;inset:0;display:grid;grid-template-columns:380px 1fr 330px;padding:70px 60px 70px 90px;gap:20px}
+.brand{font-size:26px;font-style:italic;font-weight:800;margin-bottom:2px}.brand small{display:block;font-size:11px;font-weight:600;opacity:.7}
+.menu{display:flex;flex-direction:column;gap:10px;margin-top:22px}
+.menu .btn{text-align:left;background:rgba(255,255,255,.1);border:0;border-radius:8px}
+.jump{display:flex;gap:12px;align-items:center;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.08);border-radius:10px;padding:12px;margin:0 0 10px}
+.jump .grow{flex:1}.jump small{opacity:.7;font-size:11px}
+.mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:1}.mid img{height:340px;filter:drop-shadow(0 20px 30px #000)}
+.mid h2{margin:0;font-size:20px;font-style:italic}
+.card{background:rgba(10,10,18,.85);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:14px;margin-bottom:14px;z-index:1}
+.card h4{margin:0 0 10px;font-size:13px}.card .r{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;opacity:.9}
+.big{font-size:26px;font-style:italic}.big small{font-size:11px;opacity:.7}
+.bar{position:absolute;left:90px;bottom:26px;display:flex;gap:8px}.bar .btn{padding:8px 12px;font-size:12px;border-radius:6px;background:rgba(255,255,255,.1);border:0}
+.ver{position:absolute;right:30px;bottom:26px;font-size:11px;opacity:.6;text-align:right}
+/* hub */
+.hub-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;z-index:1}
+.hub-c h1{margin:0;font-size:68px;letter-spacing:.04em;font-weight:800}
+.tiles{display:flex;gap:22px;align-items:center}
+.tile{width:170px;height:210px;border-radius:24px;border:2px solid rgba(255,255,255,.45);background:rgba(255,255,255,.06);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;cursor:pointer;transition:.15s}
+.tile:hover{transform:scale(1.1);background:rgba(255,255,255,.16);border-color:#fff}.tile i{font:normal 46px sans-serif}
+.minis{display:flex;gap:14px}.mini{width:104px;height:84px;border-radius:14px;border:2px solid rgba(255,255,255,.45);background:rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-size:12px}
+.mini:hover{background:rgba(255,255,255,.18)}.mini i{font:normal 22px sans-serif}
+.back{position:absolute;left:24px;top:22px;z-index:2}
+/* sub */
+.panel{max-width:900px;margin:0 auto;padding:70px 24px 90px;height:100%;overflow:auto}
+.row{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:10px 14px;border-radius:12px;margin-bottom:8px}
+.row .grow{flex:1;min-width:0}.row small{opacity:.65}.row img{width:40px;height:40px;border-radius:8px}
+.skins{display:grid;grid-template-columns:repeat(auto-fill,130px);gap:12px;margin-top:16px}.skins div{background:rgba(255,255,255,.07);padding:10px;border-radius:12px;text-align:center}
+.skins img{width:64px;image-rendering:pixelated}
+#log{position:fixed;left:0;right:0;bottom:4px;text-align:center;color:#999;font-size:11px;z-index:5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 20px}
+</style></head><body class="home">
+<svg id="ring" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#666"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#444"/></linearGradient></defs>
+<g transform="rotate(-22 500 330)"><ellipse cx="500" cy="330" rx="360" ry="70" fill="none" stroke="url(#g)" stroke-width="16"/></g>
+<path d="M500 180 Q520 320 640 520 Q510 380 500 420 Q490 380 370 480 Q480 330 500 180Z" fill="url(#g)" opacity=".85"/></svg>
+<div id="bg"></div><div id="hills"></div><div id="m"></div><div id="log"></div>
+<script>
+const A=window.api.inv,$=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let S={user:null,profiles:[],memory:4,cur:localStorage.getItem("cur")};
+let VERS=["1.21.4","1.21.1","1.20.4","1.20.1","1.19.4","1.18.2","1.16.5","1.12.2","1.8.9"];
+const CATS={Performance:["»","sodium","lithium","ferrite-core","immediatelyfast","moreculling","dynamic-fps","modernfix","entityculling","sodium-extra","reeses-sodium-options"],
+ HUD:["▤","appleskin","betterf3","jade","modmenu","cloth-config"],Visuals:["✦","iris","continuity","lambdynamiclights","zoomify"],
+ Player:["☺","inventory-profiles-next","mouse-tweaks","simple-voice-chat"],Misc:["☰","xaeros-minimap","xaeros-world-map","journeymap","no-chat-reports"]};
+const BASE=["sodium","lithium","ferrite-core","immediatelyfast","moreculling","dynamic-fps","modernfix"];
+window.api.onLog(m=>$("#log").textContent=m);
+const safe=f=>async(...a)=>{try{await f(...a)}catch(e){$("#log").textContent="Error: "+e.message}};
+const cls=c=>document.body.className=c;
+const arg=s=>esc(JSON.stringify(s));
+async function init(){const c=await A("state");S.profiles=c.profiles;S.memory=c.memory;S.java=c.java||"";try{VERS=await A("versions",false)}catch{}if(!S.profiles.find(p=>p.name===S.cur))S.cur=S.profiles[0]?.name||null;home()}
+function prof(){return S.profiles.find(p=>p.name===S.cur)}
+function sel(extra=""){return `<select onchange="S.cur=this.value;localStorage.setItem('cur',S.cur);${extra}">${S.profiles.map(p=>`<option ${p.name===S.cur?"selected":""}>${esc(p.name)}</option>`).join("")}</select>`}
+function home(){cls("home");const u=S.user,p=prof();
+ $("#m").innerHTML=`<div class="home-g"><div><div class="brand">Milky Client<small>Minecraft ${p?esc(p.mc):"—"} · Fabric</small></div>
+ <div class="menu"><div class="jump"><div class="grow"><small>Jump back in</small><br>${p?esc(p.name):"No profile yet"}</div>
+ <button class="btn p" onclick="play()" ${u&&p?"":"disabled"}>▶</button></div>
+ <button class="btn" onclick="profiles()">Profiles</button><button class="btn" onclick="mods()">Mods</button>
+ <button class="btn" onclick="hub()">Milky menu</button><button class="btn" onclick="settings()">Settings</button><button class="btn" onclick="window.close()">Quit game</button></div></div>
+ <div class="mid">${u?`<img src="https://mc-heads.net/body/${u.uuid}/right"><h2>${esc(u.name)}</h2><button class="btn" onclick="hub()">Wardrobe</button>`
+ :`<h2>Welcome to Milky Client</h2><button class="btn p" onclick="login()">Sign in with Microsoft</button><small style="opacity:.6">Your login stays in memory only</small>`}</div>
+ <div><div class="card"><h4>Performance mods</h4>${BASE.map(s=>`<div class="r"><span>${s}</span><span>✓ preinstalled</span></div>`).join("")}</div>
+ <div class="card"><h4>Memory</h4><div class="big">${S.memory} <small>GB RAM</small></div></div></div></div>
+ <div class="bar"><button class="btn" onclick="hub()">Milky menu</button><button class="btn">${u?esc(u.name):"Signed out"}</button><button class="btn" onclick="settings()">Settings</button></div>
+ <div class="ver">Milky 0.1.0<br>No ads · No telemetry</div>`}
+const login=safe(async()=>{S.user=await A("login");home()});
+const play=safe(async()=>{$("#log").textContent="Preparing…";await A("launch",S.cur)});
+function hub(){cls("hub");$("#m").innerHTML=`<button class="btn back" onclick="home()">← Back</button><div class="hub-c"><h1>Milky</h1>
+ <div class="tiles">${Object.entries(CATS).map(([k,v])=>`<div class="tile" onclick="modules('${k}')"><i>${v[0]}</i>${k}</div>`).join("")}</div>
+ <div class="minis"><div class="mini" onclick="skins()"><i>☻</i>Wardrobe</div><div class="mini" onclick="mods()"><i>⌕</i>Search</div>
+ <div class="mini" onclick="$('#log').textContent='Friends needs an online service, not built yet'"><i>☺☺</i>Friends</div><div class="mini" onclick="profiles()"><i>❖</i>Profiles</div></div></div>`}
+function panel(t,h){cls("sub");$("#m").innerHTML=`<button class="btn back" onclick="hub()">← Back</button><div class="panel"><h2>${t}</h2>${h}</div>`}
+function profiles(){panel("Profiles",`<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><input id="pn" placeholder="Profile name"><select id="pv">${VERS.map(v=>`<option>${v}</option>`).join("")}</select><label style="opacity:.8"><input type="checkbox" ${S.snap?"checked":""} onchange="snap(this.checked)"> snapshots</label>
+ <button class="btn p" onclick="mk()">Create</button><button class="btn" onclick="imp()">Import .mrpack</button></div>
+ ${S.profiles.map(p=>`<div class="row"><div class="grow"><b>${esc(p.name)}</b><br><small>Fabric ${esc(p.mc)}</small></div>
+ <button class="btn" onclick="A('profile:open',${arg(p.name)})">Folder</button><button class="btn" onclick="rm(${arg(p.name)})">Delete</button></div>`).join("")}`)}
+const snap=safe(async c=>{S.snap=c;VERS=await A("versions",c);profiles()});
+const mk=safe(async()=>{$("#log").textContent="Creating profile and installing performance mods…";S.profiles=await A("profile:create",$("#pn").value,$("#pv").value);S.cur=S.cur||S.profiles[0].name;profiles()});
+const imp=safe(async()=>{S.profiles=await A("pack:import");S.cur=S.cur||S.profiles[0]?.name;profiles()});
+const rm=safe(async n=>{if(confirm("Delete "+n+"?")){S.profiles=await A("profile:delete",n);S.cur=S.profiles[0]?.name||null;profiles()}});
+async function mods(){if(!S.cur){panel("Mods","Create a profile first.");return}
+ const l=await A("mods:list",S.cur);
+ panel("Mods",`${sel("mods()")}<div style="margin:12px 0"><input id="q" placeholder="Search Modrinth" style="width:300px"> <button class="btn p" onclick="srch()">Search</button></div><div id="res"></div>
+ <h3>Installed</h3>${l.map(f=>`<div class="row"><div class="grow">${esc(f)}</div><button class="btn" onclick="tg(${arg(f)})">${f.endsWith(".disabled")?"Enable":"Disable"}</button><button class="btn" onclick="del(${arg(f)})">Remove</button></div>`).join("")}`)}
+const tg=safe(async f=>{await A("mods:toggle",S.cur,f);mods()}),del=safe(async f=>{await A("mods:remove",S.cur,f);mods()});
+const srch=safe(async()=>{const r=await A("mods:search",$("#q").value,prof().mc);
+ $("#res").innerHTML=r.map(x=>`<div class="row"><img src="${esc(x.icon||"")}" onerror="this.style.visibility='hidden'"><div class="grow"><b>${esc(x.title)}</b><br><small>${esc(x.desc)}</small></div><button class="btn p" onclick="inst(${arg(x.slug)},true)">Install</button></div>`).join("")});
+const inst=safe(async(s,r)=>{if(!S.cur)throw new Error("Create a profile first");$("#log").textContent="Installing "+s+"…";await A("mods:add",S.cur,s);$("#log").textContent="Installed "+s;if(r)mods()});
+function modules(k){panel(k,`<p style="opacity:.7">Installs into ${sel()} with required dependencies.</p>${CATS[k].slice(1).map(s=>`<div class="row"><div class="grow">${s}</div><button class="btn" onclick="inst(${arg(s)})">Add</button></div>`).join("")}`)}
+async function skins(){const l=await A("skin:list");panel("Wardrobe",`<button class="btn p" onclick="addSkin()">Add skin (.png)</button>
+ <div class="skins">${l.map(s=>`<div><img src="${s.data}"><br><small>${esc(s.name)}</small><br><button class="btn" onclick="ap(${arg(s.name)},'CLASSIC')">Classic</button> <button class="btn" onclick="ap(${arg(s.name)},'SLIM')">Slim</button></div>`).join("")}</div>`)}
+const addSkin=safe(async()=>{await A("skin:add");skins()}),ap=safe(async(f,v)=>{await A("skin:apply",f,v);$("#log").textContent="Skin applied"});
+function settings(){panel("Settings",`RAM: <select onchange="A('setMem',+this.value);S.memory=+this.value">${[2,3,4,6,8,12,16].map(g=>`<option ${g===S.memory?"selected":""} value="${g}">${g} GB</option>`).join("")}</select>
+ <p>Java path (optional): <input style="width:320px" value="${esc(S.java||"")}" placeholder="java" onchange="A('setJava',this.value);S.java=this.value"></p><p style="opacity:.7">Java needed: 8 for MC up to 1.16, 17 for 1.17-1.20.4, 21 for 1.20.5+. Fabric mods only work on 1.14+; older versions run vanilla.</p>
+ <p style="opacity:.7">No ads, no telemetry. Network calls go only to Microsoft/Mojang, Modrinth, FabricMC and mc-heads.net (avatar image).</p>
+ ${S.user?`<button class="btn" onclick="A('logout');S.user=null;home()">Sign out</button>`:""}`);document.querySelector(".back").onclick=home}
+init();
+</script></body></html>

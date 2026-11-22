@@ -1,0 +1,14 @@
+{
+  "name": "milky-client",
+  "version": "0.1.0",
+  "author": "Milky",
+  "description": "Milky Client - a no-telemetry Minecraft launcher with Fabric, Modrinth and performance mods preinstalled",
+  "main": "main.js",
+  "scripts": { "start": "electron .", "dist": "electron-builder --publish never" },
+  "dependencies": { "adm-zip": "^0.5.0", "minecraft-launcher-core": "^3.16.0", "msmc": "^5.0.0" },
+  "devDependencies": { "electron": "^33.0.0", "electron-builder": "^25.1.8" },
+  "build": {
+    "appId": "gg.milky.client", "productName": "Milky Client",
+    "win": { "target": "nsis" }, "mac": { "target": "dmg" }, "linux": { "target": "AppImage" }
+  }
+}
